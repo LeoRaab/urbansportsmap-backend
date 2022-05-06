@@ -10,15 +10,18 @@
   "author": "LeoRaab",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.27.2",
     "body-parser": "^1.20.0",
     "express": "^4.18.1",
-    "express-validate": "^0.0.8",
+    "express-validator": "^6.14.0",
     "mongoose": "^6.3.1",
     "mongoose-unique-validator": "^3.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
+    "@types/geojson": "^7946.0.8",
     "@types/mongoose": "^5.11.97",
+    "@types/mongoose-unique-validator": "^1.0.6",
     "nodemon": "^2.0.16",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4"
