@@ -33,7 +33,7 @@ app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
 });
 
 mongoose
-    .connect('mongodb+srv://leo:vniepRsw2myMBDqI@cluster0.o2nyk.mongodb.net/urbansportsmap?retryWrites=true&w=majority')
+    .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.o2nyk.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`)
     .then(() => {
         app.listen(5000);
     })
