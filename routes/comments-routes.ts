@@ -1,21 +1,19 @@
 import {Router} from 'express';
 import * as commentsController from '../controllers/comments-controller';
 import {check} from 'express-validator';
+import auth from '../middleware/auth';
 
 const router = Router();
 
 router.get('/venue/:venueId', commentsController.getCommentsByVenueId);
 
-router.get('/user/:userId', commentsController.getCommentsByUserId);
+router.use(auth);
 
-router.post('/',
-    [
-        check('comment').not().isEmpty(),
-        check('venue').isMongoId(),
-        check('author').isMongoId(),
-    ], commentsController.createComment);
+router.get('/user/', commentsController.getCommentsByUserId);
 
-router.patch('/', commentsController.updateComment);
+router.post('/:venueId', check('comment').isLength({min: 3}), commentsController.createComment);
+
+router.patch('/:commentId', commentsController.updateComment);
 
 router.delete('/:commentId', check('author').isMongoId(), commentsController.deleteComment);
 
