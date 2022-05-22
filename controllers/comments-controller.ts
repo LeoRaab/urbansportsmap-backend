@@ -4,6 +4,7 @@ import HttpError from '../models/http-error';
 import Comment, { ICommentDoc } from '../models/comment';
 import * as mongoose from 'mongoose';
 import CommentsRepository from '../repositories/comments-repository';
+import MESSAGES from '../constants/messages';
 
 const commentsRepository = new CommentsRepository();
 
@@ -17,7 +18,7 @@ const getCommentsByVenueId = async (req: Request, res: Response, next: NextFunct
     }
 
     if (!comments) {
-        return next(new HttpError('Could not find comments for provided venueId!', 404));
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
     }
 
     res.json({
@@ -35,7 +36,7 @@ const getCommentsByUserId = async (req: Request, res: Response, next: NextFuncti
     }
 
     if (!comments) {
-        return next(new HttpError('Could not find comments for provided userId!', 404));
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
     }
 
     res.json({
@@ -48,7 +49,7 @@ const createComment = async (req: Request, res: Response, next: NextFunction) =>
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return next(new HttpError('Invalid input passed, please check your data.', 422));
+        return next(new HttpError(MESSAGES.INVALID_INPUT, 422));
     }
 
     const { comment } = req.body;
@@ -64,10 +65,11 @@ const createComment = async (req: Request, res: Response, next: NextFunction) =>
     }
 
     if (!createdComment) {
-        return next(new HttpError('Creating comment failed, please try again.', 500));
+        return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
     }
 
     res.status(201).json({
+        message: MESSAGES.CREATE_SUCCESSFUL,
         comment: createdComment.toObject({ getters: true })
     });
 }
@@ -77,7 +79,7 @@ const updateComment = async (req: Request, res: Response, next: NextFunction) =>
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return next(new HttpError('Invalid input passed, please check your data.', 422));
+        return next(new HttpError(MESSAGES.INVALID_INPUT, 422));
     }
 
     const commentId = req.params.commentId;
@@ -90,47 +92,30 @@ const updateComment = async (req: Request, res: Response, next: NextFunction) =>
     }
 
     if (!updatedComment) {
-        return next(new HttpError('Updating comment failed, please try again.', 500));
+        return next(new HttpError(MESSAGES.UPDATE_FAILED, 500));
     }
 
     res.json({
-        message: 'Comment has been updated.'
+        message: MESSAGES.UPDATE_SUCCESFUL,
+        comment: updatedComment
     });
 }
 
 const deleteComment = async (req: Request, res: Response, next: NextFunction) => {
     const commentId = req.params.commentId;
 
-    let comment;
-    try {
-        comment = await Comment.findById(commentId).populate(['author', 'venue']);
-    } catch (e) {
-        return next(new HttpError('Something went wrong, could not delete comment.', 500));
+    const { isDeleted, error } = await commentsRepository.deleteComment(commentId);
+
+    if (error) {
+        return next(error);
     }
 
-    if (!comment) {
-        return next(new HttpError('Could not find comment for provided id!', 404));
-    }
-
-    try {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-
-        await comment.remove({ session });
-
-        comment.author.comments.pull(comment);
-        comment.venue.comments.pull(comment);
-
-        await comment.author.save({ session });
-        await comment.venue.save({ session });
-
-        await session.commitTransaction();
-    } catch (e) {
-        return next(new HttpError('Something went wrong, could not delete comment.', 500));
+    if (!isDeleted) {
+        return next(new HttpError(MESSAGES.DELETE_FAILED, 500));
     }
 
     res.json({
-        message: 'Comment has been deleted.'
+        message: MESSAGES.DELETE_SUCCESFUL
     });
 }
 

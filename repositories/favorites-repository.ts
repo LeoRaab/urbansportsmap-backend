@@ -1,8 +1,5 @@
-/**
- * TODO: Refactor create & deleteFavorites
- */
-
 import { Types } from "mongoose";
+import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 import User, { IUserDoc } from "../models/user";
 import { IVenueDoc } from "../models/venue";
@@ -24,11 +21,11 @@ class FavoritesRepository extends BaseRepository<IUserDoc> {
         }
 
         if (!user) {
-            return { error: new HttpError('Could not find user for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) }
         }
 
         if (!venue) {
-            return { error: new HttpError('Could not find venue for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) }
         }
 
         try {
@@ -36,7 +33,7 @@ class FavoritesRepository extends BaseRepository<IUserDoc> {
             await user.save();
             return { favorites: user.favorites }
         } catch (e) {
-            return { error: new HttpError('Creating favorite failed, please try again!', 500) };
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) };
         }
     }
 
@@ -48,11 +45,11 @@ class FavoritesRepository extends BaseRepository<IUserDoc> {
         }
 
         if (!user) {
-            return { error: new HttpError('Could not find user for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 404) }
         }
 
         if (!venue) {
-            return { error: new HttpError('Could not find venue for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 404) }
         }
 
         try {
@@ -60,7 +57,7 @@ class FavoritesRepository extends BaseRepository<IUserDoc> {
             await user.save();
             return { favorites: user.favorites }
         } catch (e) {
-            return { error: new HttpError('Deleting favorite failed, please try again!', 500) };
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 500) };
         }
     }
 
@@ -75,11 +72,11 @@ class FavoritesRepository extends BaseRepository<IUserDoc> {
         }        
 
         if (!user) {
-            return { error: new HttpError('Could not find user for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.NO_DATA_FOUND, 404) }
         }
 
         if (!venue) {
-            return { error: new HttpError('Could not find venue for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.NO_DATA_FOUND, 404) }
         }
 
         return {

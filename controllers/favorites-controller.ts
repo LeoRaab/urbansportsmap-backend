@@ -3,6 +3,7 @@ import User from '../models/user';
 import HttpError from '../models/http-error';
 import Venue from '../models/venue';
 import FavoritesRepository from '../repositories/favorites-repository';
+import MESSAGES from '../constants/messages';
 
 const favoritesRepository = new FavoritesRepository();
 
@@ -16,7 +17,7 @@ const getFavorites = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     if (!user) {
-        return next(new HttpError('Could not find user for provided id!', 404));
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
     }
 
     res.json({
@@ -35,10 +36,11 @@ const createFavorite = async (req: Request, res: Response, next: NextFunction) =
     }
 
     if (!favorites) {
-        return next(new HttpError('Creating favorite failed, please try again!', 500));
+        return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
     }
 
     res.status(201).json({
+        message: MESSAGES.CREATE_SUCCESSFUL,
         favorites
     });
 }
@@ -54,10 +56,11 @@ const deleteFavorite = async (req: Request, res: Response, next: NextFunction) =
     }
 
     if (!favorites) {
-        return next(new HttpError('Creating favorite failed, please try again!', 500));
+        return next(new HttpError(MESSAGES.DELETE_FAILED, 500));
     }
 
     res.json({
+        message: MESSAGES.DELETE_SUCCESFUL,
         favorites
     });
 }

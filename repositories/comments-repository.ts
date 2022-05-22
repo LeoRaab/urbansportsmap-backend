@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import MESSAGES from '../constants/messages';
 import Comment, { ICommentDoc } from "../models/comment";
 import HttpError from "../models/http-error";
 import BaseRepository from "./base-repository";
@@ -28,17 +29,17 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
         }
 
         if (!user) {
-            return { error: new HttpError('Could not find user for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) }
         }
 
         if (!venue) {
-            return { error: new HttpError('Could not find venue for provided id!', 404) }
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) }
         }
 
         try {
             const session = await mongoose.startSession();
             session.startTransaction();
-            
+
             console.log(createdComment);
 
             await createdComment.save();
@@ -51,7 +52,7 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
 
             await session.commitTransaction();
         } catch (e) {
-            return { error: new HttpError('Creating comment failed, please try again.', 500) };
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) };
         }
 
         return { createdComment }
@@ -66,10 +67,44 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
         }
 
         if (!comments) {
-            return { error: new HttpError('Could not find comments for provided userId!', 404) }
+            return { error: new HttpError(MESSAGES.NO_DATA_FOUND, 404) }
         }
 
         return { comments }
+    }
+
+    async deleteComment(commentId: string): Promise<{ isDeleted?: boolean, error?: HttpError}> {
+
+        const {result: comment, error} = await this.readByIdAndPopulate(commentId, ['author', 'venue'])
+
+        if (error) {
+            return { error }
+        }
+
+        if (!comment) {
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 404) };
+        }
+
+        try {
+            const session = await mongoose.startSession();
+            session.startTransaction();
+
+            await comment.remove({ session });
+
+            comment.author.comments.pull(comment);
+            comment.venue.comments.pull(comment);
+
+            await comment.author.save({ session });
+            await comment.venue.save({ session });
+
+            await session.commitTransaction();
+        } catch (e) {
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 500) };
+        }
+
+        return {
+            isDeleted: true
+        }
     }
 }
 

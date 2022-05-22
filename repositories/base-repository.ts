@@ -1,4 +1,5 @@
 import { Model, HydratedDocument, UnpackedIntersection } from "mongoose";
+import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 
 abstract class BaseRepository<T> {
@@ -15,7 +16,7 @@ abstract class BaseRepository<T> {
             await createdItem.save();
             return { item: createdItem }
         } catch (e) {
-            return { error: new HttpError('Creating item failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) }
         }
     }
 
@@ -24,7 +25,7 @@ abstract class BaseRepository<T> {
             const result = await this.model.find<T>({ condition });
             return { result }
         } catch (e) {
-            return { error: new HttpError('Fetching items failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
@@ -34,7 +35,7 @@ abstract class BaseRepository<T> {
             return { result }
         } catch (e) {
             console.log(e);
-            return { error: new HttpError('Fetching item failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
@@ -43,16 +44,16 @@ abstract class BaseRepository<T> {
             const result = await this.model.findById<T>(id, projection);
             return { result }
         } catch (e) {
-            return { error: new HttpError('Fetching item failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
-    async readByIdAndPopulate(id: string, populateWith: string, projection?: string[]): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
+    async readByIdAndPopulate(id: string, populateWith: string | string[], projection?: string[]): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
         try {
             const result = await this.model.findById<T>(id, projection).populate(populateWith);
             return { result }
         } catch (e) {
-            return { error: new HttpError('Fetching item failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
@@ -61,7 +62,7 @@ abstract class BaseRepository<T> {
             const result = await this.model.findOne(condition, projection);
             return { result }
         } catch (e) {
-            return { error: new HttpError('Fetching item failed, please try again later!', 500) }
+            return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
@@ -70,7 +71,7 @@ abstract class BaseRepository<T> {
             const result = await this.model.findOne<T>(condition, projection).populate(populateWith);
             return { result }
         } catch (e) {
-            return { error: new HttpError('Fetching item failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
@@ -79,12 +80,12 @@ abstract class BaseRepository<T> {
             const result = await this.model.findByIdAndUpdate(updateId, updateItem);
 
             if (!result) {
-                return { error: new HttpError('Updating item failed, please try again later.', 500) }
+                return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) }
             }
             
             return { result }
         } catch (e) {
-            return { error: new HttpError('Updating item failed, please try again later.', 500) }
+            return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) }
         }
     }
 

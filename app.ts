@@ -14,6 +14,7 @@ import favoritesRoutes from './routes/favorites-routes';
 import commentsRoutes from './routes/comments-routes';
 
 import HttpError from './models/http-error';
+import MESSAGES from './constants/messages';
 
 const app = express();
 
@@ -40,7 +41,7 @@ app.use('/api/favorites', favoritesRoutes);
 app.use('/api/comments', commentsRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-    next(new HttpError('Could not find this route.', 404));
+    next(new HttpError(MESSAGES.NO_ROUTE_FOUND, 404));
 });
 
 app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
@@ -49,7 +50,7 @@ app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
     }
 
     res.status(error.code || 500);
-    res.json({message: error.message || 'An unknown error occurred!'});
+    res.json({message: error.message || MESSAGES.UNKNOWN_ERROR});
 });
 
 mongoose

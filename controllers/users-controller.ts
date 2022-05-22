@@ -6,6 +6,7 @@ import HttpError from '../models/http-error';
 import UsersRepository from '../repositories/users-repository';
 import { signToken } from '../util/handle-jwt';
 import { compareHashStrings } from '../util/handle-crypt';
+import MESSAGES from '../constants/messages';
 
 const usersRepository = new UsersRepository();
 
@@ -17,7 +18,7 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!result) {
-        return next(new HttpError('Could not find ressource for provided id!', 404));
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
     }
 
     res.json({
@@ -29,7 +30,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return next(new HttpError('Invalid input passed, please check your data.', 422));
+        return next(new HttpError(MESSAGES.INVALID_INPUT, 422));
     }
 
     const { email, password, name } = req.body;
@@ -42,16 +43,17 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!userId) {
-        return next(new HttpError('Signing up failed, please try again later!', 500));
+        return next(new HttpError(MESSAGES.SIGNUP_FAILED, 500));
     }
 
     const token = signToken(userId, email);
 
     if (!token) {
-        return next(new HttpError('Signing up failed, please try again later!', 500));
+        return next(new HttpError(MESSAGES.SIGNUP_FAILED, 500));
     }
 
     res.status(201).json({
+        message: MESSAGES.SIGNUP_SUCCESSFUL,
         userid: userId,
         token: token
     });
@@ -62,7 +64,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-        return next(new HttpError('Invalid input passed, please check your data.', 422));
+        return next(new HttpError(MESSAGES.INVALID_INPUT, 422));
     }
 
     const { email, password } = req.body;
@@ -75,7 +77,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
     if (!identifiedUser) {
         return {
-            error: new HttpError('Invalid credentials, could not log you in.', 401)
+            error: new HttpError(MESSAGES.INVALID_CREDENTIALS, 401)
         }
     }
 
@@ -86,13 +88,13 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!isValidPassword) {
-        return next(new HttpError('Invalid credentials, could not log you in.', 401))
+        return next(new HttpError(MESSAGES.INVALID_CREDENTIALS, 401))
     }
 
     const token = signToken(identifiedUser.id, identifiedUser.email);
 
     if (!token) {
-        return next(new HttpError('Logging in failed, please try again later!', 500));
+        return next(new HttpError(MESSAGES.LOGIN_FAILED, 500));
     }
 
     res.json({
@@ -104,7 +106,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 const logout = async (req: Request, res: Response, next: NextFunction) => {
 
     res.json({
-        message: 'User logged out.'
+        message: MESSAGES.LOGOUT_SUCCESSFUL
     });
 }
 

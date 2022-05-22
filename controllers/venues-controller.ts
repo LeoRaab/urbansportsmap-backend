@@ -3,6 +3,7 @@ import {fetchPlaygrounds, fetchSportFacilities} from '../util/fetch-venues';
 import Venue, {IVenue, IVenueDoc} from '../models/venue';
 import HttpError from '../models/http-error';
 import VenuesRepository from '../repositories/venues-repository';
+import MESSAGES from '../constants/messages';
 
 const venuesRepository = new VenuesRepository();
 
@@ -14,7 +15,7 @@ const getVenues = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!venues) {
-        return next(new HttpError('Could not get venues.', 404));
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
     }
 
     res.json({
@@ -32,7 +33,7 @@ const getVenueById = async (req: Request, res: Response, next: NextFunction) => 
     }
 
     if (!venue) {
-        return next(new HttpError('Could not fetch venue, please try again!', 500));
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 500));
     }
 
     res.json({

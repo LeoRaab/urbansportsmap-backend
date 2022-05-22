@@ -18,7 +18,7 @@ router.post('/signup',
         check('name').not().isEmpty()
     ], usersController.signup);
 
-//router.use(auth);
+router.use(auth);
 
 router.get('/:userId', usersController.getUserById);
 

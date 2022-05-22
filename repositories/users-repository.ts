@@ -1,3 +1,4 @@
+import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 import User, { IUser, IUserDoc } from "../models/user";
 import { hashString } from "../util/handle-crypt";
@@ -17,13 +18,13 @@ class UsersRepository extends BaseRepository<IUserDoc> {
         }
 
         if (existingUser) {
-            return { error: new HttpError('User already exists, please login instead.', 422) }
+            return { error: new HttpError(MESSAGES.USER_EXISTS, 422) }
         }
 
         const hashedPassword = await hashString(user.password);
 
         if (!hashedPassword) {
-            return { error: new HttpError('Signing up failed, please try again later!', 500) }
+            return { error: new HttpError(MESSAGES.SIGNUP_FAILED, 500) }
         }
 
         const newUser = {
@@ -41,7 +42,7 @@ class UsersRepository extends BaseRepository<IUserDoc> {
         }
 
         if (!createdUser) {
-            return { error: new HttpError('Signing up failed, please try again later!', 500) }
+            return { error: new HttpError(MESSAGES.SIGNUP_FAILED, 500) }
         }
         
         return { userId: createdUser.id }
