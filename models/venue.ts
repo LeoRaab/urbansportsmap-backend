@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import {IComment} from './comment';
+import {ICommentDoc} from './comment';
 
 const Schema = mongoose.Schema;
 
@@ -13,7 +13,7 @@ export interface IVenue {
 }
 
 export interface IVenueDoc extends IVenue, mongoose.Document {
-    comments: mongoose.Types.Array<IComment>
+    comments: mongoose.Types.Array<ICommentDoc>
 }
 
 const venueSchema = new Schema<IVenueDoc>({
