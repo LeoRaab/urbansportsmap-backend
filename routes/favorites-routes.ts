@@ -1,17 +1,15 @@
 import {Router} from 'express';
 import * as favoritesController from '../controllers/favorites-controller';
-import {check} from 'express-validator';
+import auth from '../middleware/auth';
 
 const router = Router();
 
-router.get('/:userId', favoritesController.getFavoritesByUserId);
+router.use(auth);
 
-router.post('/:venueId',
-    check('userId').isMongoId(),
-    favoritesController.createFavorite);
+router.get('/', favoritesController.getFavorites);
 
-router.delete('/:venueId',
-    check('userId').isMongoId(),
-    favoritesController.deleteFavorite);
+router.post('/:venueId', favoritesController.createFavorite);
+
+router.delete('/:venueId', favoritesController.deleteFavorite);
 
 export default router;
