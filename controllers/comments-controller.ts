@@ -1,36 +1,47 @@
-import {NextFunction, Request, Response} from 'express';
-import {validationResult} from 'express-validator';
+import { NextFunction, Request, Response } from 'express';
+import { validationResult } from 'express-validator';
 import HttpError from '../models/http-error';
-import Comment from '../models/comment';
-import User from '../models/user';
+import Comment, { ICommentDoc } from '../models/comment';
 import * as mongoose from 'mongoose';
-import Venue from '../models/venue';
+import CommentsRepository from '../repositories/comments-repository';
+
+const commentsRepository = new CommentsRepository();
 
 const getCommentsByVenueId = async (req: Request, res: Response, next: NextFunction) => {
     const venueId = req.params.venueId;
 
+    const { comments, error } = await commentsRepository.readComments({ venue: venueId });
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!comments) {
+        return next(new HttpError('Could not find comments for provided venueId!', 404));
+    }
+
     res.json({
-        message: 'Get comments by venueId: ' + venueId
+        comments: comments.map((comment: ICommentDoc) => comment.toObject({ getters: true }))
     });
 }
 
 const getCommentsByUserId = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.params.userId;
+    const userId = req.userId;
 
-    let user;
-    try {
-        user = await User.findById(userId).populate('comments');
-    } catch (e) {
-        return next(new HttpError('Fetching comments failed, please try again later.', 500))
+    const { comments, error } = await commentsRepository.readComments({ author: userId });
+
+    if (error) {
+        return next(error);
     }
 
-    if (!user) {
-        return next(new HttpError('Could not find user for provided id!', 404));
+    if (!comments) {
+        return next(new HttpError('Could not find comments for provided userId!', 404));
     }
 
     res.json({
-        comments: user.toObject({getters: true}).comments
+        comments: comments.map((comment: ICommentDoc) => comment.toObject({ getters: true }))
     });
+
 }
 
 const createComment = async (req: Request, res: Response, next: NextFunction) => {
@@ -40,55 +51,24 @@ const createComment = async (req: Request, res: Response, next: NextFunction) =>
         return next(new HttpError('Invalid input passed, please check your data.', 422));
     }
 
-    const { comment, venue, author } = req.body;
+    const { comment } = req.body;
+    const userId = req.userId;
+    const venueId = req.params.venueId;
 
-    const createdComment = new Comment({
-        comment,
-        venue,
-        author
-    });
+    console.log(comment + ' | ' + userId + ' | ' + venueId);
 
-    let user;
-    try {
-        user = await User.findById(author);
-    } catch (e) {
-        return next(new HttpError('Creating comment failed, please try again.', 500));
+    const { createdComment, error } = await commentsRepository.createComment(comment, userId, venueId);
+
+    if (error) {
+        return next(error);
     }
 
-    if (!user) {
-        return next(new HttpError('Could not find user for provided id!', 404));
-    }
-
-    let providedVenue;
-    try {
-        providedVenue =  await Venue.findById(venue);
-    } catch (e) {
-        return next(new HttpError('Creating comment failed, please try again.', 500));
-    }
-
-    if (!providedVenue) {
-        return next(new HttpError('Could not find venue for provided id!', 404));
-    }
-
-    try {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-
-        await createdComment.save();
-
-        user.comments.push(createdComment);
-        providedVenue.comments.push(createdComment);
-
-        await user.save({session});
-        await providedVenue.save({session});
-
-        await session.commitTransaction();
-    } catch (e) {
+    if (!createdComment) {
         return next(new HttpError('Creating comment failed, please try again.', 500));
     }
 
     res.status(201).json({
-        comment: createdComment.toObject({getters: true})
+        comment: createdComment.toObject({ getters: true })
     });
 }
 
@@ -98,6 +78,19 @@ const updateComment = async (req: Request, res: Response, next: NextFunction) =>
 
     if (!errors.isEmpty()) {
         return next(new HttpError('Invalid input passed, please check your data.', 422));
+    }
+
+    const commentId = req.params.commentId;
+    const commentText = req.body.comment;
+
+    const { result: updatedComment, error } = await commentsRepository.update(commentId, { comment: commentText });
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!updatedComment) {
+        return next(new HttpError('Updating comment failed, please try again.', 500));
     }
 
     res.json({
@@ -123,13 +116,13 @@ const deleteComment = async (req: Request, res: Response, next: NextFunction) =>
         const session = await mongoose.startSession();
         session.startTransaction();
 
-        await comment.remove({session});
+        await comment.remove({ session });
 
         comment.author.comments.pull(comment);
         comment.venue.comments.pull(comment);
 
-        await comment.author.save({session});
-        await comment.venue.save({session});
+        await comment.author.save({ session });
+        await comment.venue.save({ session });
 
         await session.commitTransaction();
     } catch (e) {

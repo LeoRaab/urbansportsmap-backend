@@ -1,37 +1,38 @@
 import {NextFunction, Request, Response} from 'express';
 import {fetchPlaygrounds, fetchSportFacilities} from '../util/fetch-venues';
-import Venue, {IVenue} from '../models/venue';
+import Venue, {IVenue, IVenueDoc} from '../models/venue';
 import HttpError from '../models/http-error';
+import VenuesRepository from '../repositories/venues-repository';
+
+const venuesRepository = new VenuesRepository();
 
 const getVenues = async (req: Request, res: Response, next: NextFunction) => {
-    let venues;
+    const {result: venues, error} = await venuesRepository.readAll();
 
-    try {
-        venues = await Venue.find().populate('comments');
-    } catch (error) {
-        return next(new HttpError('Something went wrong, could not find venues.', 500));
+    if (error) {
+        return next(error);
     }
 
     if (!venues) {
         return next(new HttpError('Could not get venues.', 404));
     }
+
     res.json({
-        venues: venues.map(venue => venue.toObject({getters: true}))
+        venues: venues.map((venue: IVenueDoc) => venue.toObject({getters: true}))
     });
 }
 
 const getVenueById = async (req: Request, res: Response, next: NextFunction) => {
     const venueId = req.params.venueId;
 
-    let venue;
-    try {
-        venue = await Venue.findById(venueId).populate('comments');
-    } catch (e) {
-        return next(new HttpError('Fetching venue failed, please try again later.', 500))
+    const {result: venue, error} = await venuesRepository.readById(venueId);
+
+    if (error) {
+        return next(error);
     }
 
     if (!venue) {
-        return next(new HttpError('Could not find venue for provided id!', 404));
+        return next(new HttpError('Could not fetch venue, please try again!', 500));
     }
 
     res.json({

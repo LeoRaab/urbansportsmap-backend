@@ -1,41 +1,27 @@
-import {NextFunction, Request, Response} from 'express';
-import {validationResult} from 'express-validator';
-import User from '../models/user';
+import { NextFunction, Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+
+import User, { IUser } from '../models/user';
 import HttpError from '../models/http-error';
+import UsersRepository from '../repositories/users-repository';
+import { signToken } from '../util/handle-jwt';
+import { compareHashStrings } from '../util/handle-crypt';
 
-
-const getUsers = async (req: Request, res: Response, next: NextFunction) => {
-
-    let users;
-
-    try {
-        users = await User.find({}, '-password');
-    } catch (e) {
-        return next(new HttpError('Fetching users failed, please try again later.', 500))
-    }
-
-    res.json({
-        users: users.map(user => user.toObject({getters: true}))
-    });
-}
+const usersRepository = new UsersRepository();
 
 const getUserById = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.params.userId;
+    const { result, error } = await usersRepository.readById(req.params.userId, ['-password']);
 
-    let user;
-    try {
-        user = await User.findById(userId, '-password').populate('favorites');
-    } catch (e) {
-        console.log(e);
-        return next(new HttpError('Fetching user failed, please try again later.', 500))
+    if (error) {
+        return next(error);
     }
 
-    if (!user) {
-        return next(new HttpError('Could not find user for provided id!', 404));
+    if (!result) {
+        return next(new HttpError('Could not find ressource for provided id!', 404));
     }
 
     res.json({
-        user: user.toObject({getters: true})
+        user: result.toObject({ getters: true })
     });
 }
 
@@ -47,35 +33,27 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const { email, password, name } = req.body;
+    const newUser: IUser = { email, password, name };
 
-    let existingUser;
+    const { userId, error } = await usersRepository.createUser(newUser);
 
-    try {
-        existingUser = await User.findOne({email})
-    } catch (e) {
-        return next(new HttpError('Signing up failed, please try again later!', 500))
+    if (error) {
+        return next(error);
     }
 
-    if (existingUser) {
-        return next(new HttpError('User already exists, please login instead.', 422))
+    if (!userId) {
+        return next(new HttpError('Signing up failed, please try again later!', 500));
     }
 
-    const createdUser = new User({
-        email,
-        password,
-        name,
-        comments: [],
-        favorites: []
-    })
+    const token = signToken(userId, email);
 
-    try {
-        await createdUser.save();
-    } catch (e) {
-        return next(new HttpError('Signing up failed, please try again later!', 500))
+    if (!token) {
+        return next(new HttpError('Signing up failed, please try again later!', 500));
     }
 
     res.status(201).json({
-        user: createdUser.toObject({ getters: true})
+        userid: userId,
+        token: token
     });
 }
 
@@ -89,20 +67,37 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
     const { email, password } = req.body;
 
-    let identifiedUser;
+    const { result: identifiedUser, error: readError } = await usersRepository.readOne({ email: email });
 
-    try {
-        identifiedUser = await User.findOne({email})
-    } catch (e) {
-        return next(new HttpError('Logging in failed, please try again later.', 500))
+    if (readError) {
+        return { error: readError }
     }
 
-    if (!identifiedUser || identifiedUser.password !== password) {
+    if (!identifiedUser) {
+        return {
+            error: new HttpError('Invalid credentials, could not log you in.', 401)
+        }
+    }
+
+    const {isEqual: isValidPassword, error } = await compareHashStrings(password, identifiedUser.password);
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!isValidPassword) {
         return next(new HttpError('Invalid credentials, could not log you in.', 401))
     }
 
+    const token = signToken(identifiedUser.id, identifiedUser.email);
+
+    if (!token) {
+        return next(new HttpError('Logging in failed, please try again later!', 500));
+    }
+
     res.json({
-        message: 'Logged in!'
+        userId: identifiedUser.id,
+        token: token
     });
 }
 
@@ -114,7 +109,6 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 export {
-    getUsers,
     getUserById,
     signup,
     login,
