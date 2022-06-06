@@ -1,5 +1,5 @@
 /**
- * TODO: Get rid of all any/object types
+ * TODO: Logging system
  */
 
 import * as express from 'express';
