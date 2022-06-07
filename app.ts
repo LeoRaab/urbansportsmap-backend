@@ -15,6 +15,7 @@ import commentsRoutes from './routes/comments-routes';
 
 import HttpError from './models/http-error';
 import MESSAGES from './constants/messages';
+import imagesRoutes from './routes/images-routes';
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/venues', venuesRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/comments', commentsRoutes);
+app.use('/api/images', imagesRoutes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     next(new HttpError(MESSAGES.NO_ROUTE_FOUND, 404));

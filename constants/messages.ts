@@ -2,6 +2,8 @@ const MESSAGES = {
     UNKNOWN_ERROR: 'Ein unbekannter Fehler ist aufgetreten',
     NO_ROUTE_FOUND: 'Die angeforderte Url existiert nicht!',
     NO_DATA_FOUND: 'Es konnten keine Daten gefunden werden!',
+    NO_IMAGE_FOUND: 'Es konnte kein Bild gefunden werden!',
+    INVALID_MIME_TYPE: 'Das Bildformat wird nicht unterstützt!',
     FETCH_FAILED: 'Es konnten keine Daten geladen werden!',
     CREATE_FAILED: 'Speichern fehlgeschlagen, versuch es bitte erneut.',
     CREATE_SUCCESSFUL: 'Erfolgreich gespeichert!',
