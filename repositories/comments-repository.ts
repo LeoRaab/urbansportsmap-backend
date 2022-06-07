@@ -40,9 +40,7 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
             const session = await mongoose.startSession();
             session.startTransaction();
 
-            console.log(createdComment);
-
-            await createdComment.save();
+            await createdComment.save({ session });
 
             user.comments.push(createdComment);
             venue.comments.push(createdComment);
@@ -73,9 +71,9 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
         return { comments }
     }
 
-    async deleteComment(commentId: string): Promise<{ isDeleted?: boolean, error?: HttpError}> {
+    async deleteComment(commentId: string): Promise<{ isDeleted?: boolean, error?: HttpError }> {
 
-        const {result: comment, error} = await this.readByIdAndPopulate(commentId, ['author', 'venue'])
+        const { result: comment, error } = await this.readByIdAndPopulate(commentId, ['author', 'venue'])
 
         if (error) {
             return { error }
