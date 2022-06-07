@@ -2,4 +2,6 @@
 
 /.idea
 
+/uploads
+
 nodemon.json
