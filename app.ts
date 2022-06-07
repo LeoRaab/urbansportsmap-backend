@@ -3,7 +3,8 @@
  */
 
 import * as express from 'express';
-import {Request, Response, NextFunction} from 'express';
+import * as path from 'path';
+import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as mongoose from 'mongoose';
 import * as cors from 'cors';
@@ -32,7 +33,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
     next();
 });
- */
+*/
+
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 app.use(cors());
 
@@ -52,7 +55,7 @@ app.use((error: HttpError, req: Request, res: Response, next: NextFunction) => {
     }
 
     res.status(error.code || 500);
-    res.json({message: error.message || MESSAGES.UNKNOWN_ERROR});
+    res.json({ message: error.message || MESSAGES.UNKNOWN_ERROR });
 });
 
 mongoose
