@@ -1,4 +1,4 @@
-import { Model, HydratedDocument, UnpackedIntersection } from "mongoose";
+import { Model, HydratedDocument, UnpackedIntersection, FilterQuery } from "mongoose";
 import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 
@@ -20,18 +20,18 @@ abstract class BaseRepository<T> {
         }
     }
 
-    async readAll(condition?: object): Promise<{ result?: T[], error?: HttpError }> {
+    async readAll(condition?: FilterQuery<T>): Promise<{ result?: T[], error?: HttpError }> {
         try {
-            const result = await this.model.find<T>({ condition });
+            const result = await this.model.find<T>({ ...condition });
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
-    async readAllAndPopulate(condition: object, populateWith: string, selectField?: string, projection?: string[]): Promise<{ result?: T[] | null, error?: HttpError }> {
+    async readAllAndPopulate(populateWith: string, condition?: FilterQuery<T>, selectField?: string, projection?: string[]): Promise<{ result?: T[] | null, error?: HttpError }> {
         try {
-            const result = await this.model.find<T>(condition, projection).populate(populateWith, selectField);
+            const result = await this.model.find<T>({ ...condition }, projection).populate(populateWith, selectField);
             return { result }
         } catch (e) {
             console.log(e);
@@ -82,7 +82,7 @@ abstract class BaseRepository<T> {
             if (!result) {
                 return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) }
             }
-            
+
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) }
