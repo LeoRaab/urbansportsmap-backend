@@ -6,6 +6,8 @@ import checkUploadPath from "../middleware/check-upload-path";
 
 const router = Router();
 
+router.get('/venue/:venueId', imagesController.getImagesByVenue)
+
 router.use(auth);
 
 router.post('/:venueId', checkUploadPath, fileUpload.single('image'), imagesController.uploadImage);
