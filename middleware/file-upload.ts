@@ -18,13 +18,15 @@ const MIME_TYPE_MAP: IMIME_TYPE_MAP = {
 }
 
 const fileUpload = multer({
+    
     //limit uploads to 2 MB
     limits: {
         fileSize: 2097152
     },
     storage: multer.diskStorage({
         destination: (request: Request, file: Express.Multer.File, callback: DestinationCallback) => {
-            callback(null, 'uploads/images')
+            const path = 'uploads/images/venues/' + request.params.venueId;
+            callback(null, path)
         },
         filename: (request: Request, file: Express.Multer.File, callback: FileNameCallback) => {
             const extension: string = MIME_TYPE_MAP[file.mimetype as keyof IMIME_TYPE_MAP];
