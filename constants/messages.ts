@@ -4,6 +4,7 @@ const MESSAGES = {
     NO_DATA_FOUND: 'Es konnten keine Daten gefunden werden!',
     NO_IMAGE_FOUND: 'Es konnte kein Bild gefunden werden!',
     INVALID_MIME_TYPE: 'Das Bildformat wird nicht unterstützt!',
+    MISSING_PARAMETERS: 'Es konnten nicht alle notwendigen Parameter gefunden werden.',
     FETCH_FAILED: 'Es konnten keine Daten geladen werden!',
     CREATE_FAILED: 'Speichern fehlgeschlagen, versuch es bitte erneut.',
     CREATE_SUCCESSFUL: 'Erfolgreich gespeichert!',
