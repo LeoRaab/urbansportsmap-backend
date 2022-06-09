@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { FilterQuery } from "mongoose";
 import MESSAGES from '../constants/messages';
 import Comment, { ICommentDoc } from "../models/comment";
 import HttpError from "../models/http-error";
@@ -56,9 +57,9 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
         return { createdComment }
     }
 
-    async readComments(condition: object): Promise<{ comments?: ICommentDoc[], error?: HttpError }> {
+    async readComments(condition: FilterQuery<ICommentDoc>): Promise<{ comments?: ICommentDoc[], error?: HttpError }> {
 
-        const { result: comments, error } = await this.readAllAndPopulate(condition, 'author', 'name');
+        const { result: comments, error } = await this.readAllAndPopulate('author', condition, 'name');
 
         if (error) {
             return { error }
