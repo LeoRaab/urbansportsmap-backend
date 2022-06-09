@@ -4,6 +4,7 @@ import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 import VenueImage, { IVenueImageDoc } from "../models/venue-image";
 import BaseRepository from "./base-repository";
+import UsersRepository from './users-repository';
 import VenuesRepository from "./venues-repository";
 
 class ImagesRepository extends BaseRepository<IVenueImageDoc> {
@@ -11,22 +12,27 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
         super(VenueImage)
     }
 
-    async createImage(filename: string, altText: string, venueId: string): Promise<{ createdImage?: IVenueImageDoc, error?: HttpError }> {
+    async createImage(filename: string, altText: string, venueId: string, userId: string): Promise<{ createdImage?: IVenueImageDoc, error?: HttpError }> {
         const venuesRepository = new VenuesRepository();
+        const usersRepository = new UsersRepository();
 
-        const { result: venue, error } = await venuesRepository.readById(venueId)
+        const { result: venue, error: venueError } = await venuesRepository.readById(venueId);
 
-        if (error) {
-            return { error }
+        const { result: user, error: userError } = await usersRepository.readById(userId);
+
+        if (venueError || userError) {
+            return { error: venueError || userError }
         }
 
-        if (!venue) {
+        if (!venue || !user) {
             return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) }
         }
 
         const createdImage = new VenueImage({
             filename,
-            altText
+            altText,
+            user,
+            venue
         })
 
         try {
@@ -35,9 +41,11 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
 
             await createdImage.save({ session });
 
-            venue.images.push(createdImage);
-
+            venue.images.push(createdImage);                
             await venue.save({ session });
+
+            user.images.push(createdImage);
+            await user.save({ session });        
 
             await session.commitTransaction();
         } catch (e) {
