@@ -5,9 +5,9 @@ import {IUserDoc} from './user';
 const Schema = mongoose.Schema;
 
 export interface ICommentDoc extends mongoose.Document {
-    comment: string;
-    venue: IVenueDoc;
-    author: IUserDoc;
+    comment: string,
+    venue: IVenueDoc,
+    author: IUserDoc
 }
 
 const commentSchema = new Schema<ICommentDoc>({
