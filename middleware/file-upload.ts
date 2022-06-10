@@ -23,7 +23,7 @@ const fileUpload = multer({
     limits: {
         fileSize: 2097152
     },
-    storage: multer.diskStorage({
+    /* storage: multer.diskStorage({
         destination: (request: Request, file: Express.Multer.File, callback: DestinationCallback) => {
             const path = 'uploads/images/venues/' + request.params.venueId;
             callback(null, path)
@@ -32,7 +32,8 @@ const fileUpload = multer({
             const extension: string = MIME_TYPE_MAP[file.mimetype as keyof IMIME_TYPE_MAP];
             callback(null, uuid.v1() + '.' + extension)
         }
-    }),
+    }), */
+    storage: multer.memoryStorage(),
     fileFilter: (request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
         const isValid = !!MIME_TYPE_MAP[file.mimetype as keyof IMIME_TYPE_MAP];
         const error = isValid ? null : new Error();
