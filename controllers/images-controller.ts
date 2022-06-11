@@ -24,6 +24,43 @@ const getImagesByVenue = async (req: Request, res: Response, next: NextFunction)
     });
 }
 
+const getImagesByUser = async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.userId;
+
+    const { result: images, error } = await imagesRepository.readAll({ user: userId });
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!images) {
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
+    }
+
+    res.json({
+        images: images.map((image: IVenueImageDoc) => image.toObject({ getters: true }))
+    });
+}
+
+const getImagesByVenueAndUser = async (req: Request, res: Response, next: NextFunction) => {
+    const venueId = req.params.venueId;
+    const userId = req.userId;
+
+    const { result: images, error } = await imagesRepository.readAll({ venue: venueId, user: userId });
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!images) {
+        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
+    }
+
+    res.json({
+        images: images.map((image: IVenueImageDoc) => image.toObject({ getters: true }))
+    });
+}
+
 const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
     /*
     const errors = validationResult(req);
@@ -37,29 +74,32 @@ const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
     const venueId = req.params.venueId;
     const userId = req.userId;
 
-    if (!req.file) {
+    if (!req.files) {
         return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
-    }    
+    }
 
-    const filename = req.file.filename;
+    const images = req.files as Express.Multer.File[];
 
-    const { createdImage, error } = await imagesRepository.createImage(filename, altText, venueId, userId);
+    const imageFilenames = images.map(image => image.filename);
+
+    const { createdImages, error } = await imagesRepository.createImages(imageFilenames, venueId, userId);
 
     if (error) {
         return next(error);
     }
 
-    if (!createdImage) {
+    if (!createdImages) {
         return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
     }
 
     res.status(201).json({
-        message: MESSAGES.CREATE_SUCCESSFUL,
-        comment: createdImage.toObject({ getters: true })
+        message: MESSAGES.CREATE_SUCCESSFUL
     });
 }
 
 export {
     getImagesByVenue,
+    getImagesByUser,
+    getImagesByVenueAndUser,
     uploadImage
 }
