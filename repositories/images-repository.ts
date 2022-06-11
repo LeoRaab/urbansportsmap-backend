@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-
+import * as uuid from "uuid"
 import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 import VenueImage, { IVenueImageDoc } from "../models/venue-image";
@@ -12,7 +12,7 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
         super(VenueImage)
     }
 
-    async createImage(filename: string, altText: string, venueId: string, userId: string): Promise<{ createdImage?: IVenueImageDoc, error?: HttpError }> {
+    async createImages(imageFilenames: string[], venueId: string, userId: string): Promise<{ createdImages?: IVenueImageDoc[], error?: HttpError }> {
         const venuesRepository = new VenuesRepository();
         const usersRepository = new UsersRepository();
 
@@ -28,31 +28,39 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
             return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) }
         }
 
-        const createdImage = new VenueImage({
-            filename,
-            altText,
-            user,
-            venue
-        })
+        const createdImages: IVenueImageDoc[] = [];
 
-        try {
-            const session = await mongoose.startSession();
-            session.startTransaction();
+        for (const filename of imageFilenames) {
 
-            await createdImage.save({ session });
+            const altText = venue.name + ' | ' + new Date().toLocaleDateString();
 
-            venue.images.push(createdImage);                
-            await venue.save({ session });
-
-            user.images.push(createdImage);
-            await user.save({ session });        
-
-            await session.commitTransaction();
-        } catch (e) {
-            return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) };
+            const createdImage = new VenueImage({
+                filename,
+                altText,
+                user,
+                venue
+            });
+    
+            try {
+                const session = await mongoose.startSession();
+                session.startTransaction();
+    
+                await createdImage.save({ session });
+    
+                venue.images.push(createdImage);                
+                await venue.save({ session });
+    
+                user.images.push(createdImage);
+                await user.save({ session });        
+    
+                await session.commitTransaction();
+            } catch (e) {
+                return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) };
+            }
         }
+        
 
-        return { createdImage }
+        return { createdImages }
     }
 }
 

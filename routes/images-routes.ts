@@ -7,10 +7,14 @@ import resizeImages from "../middleware/resize-images";
 
 const router = Router();
 
-router.get('/venue/:venueId', imagesController.getImagesByVenue)
+router.get('/venue/:venueId', imagesController.getImagesByVenue);
 
 router.use(auth);
 
-router.post('/:venueId', checkUploadPath, fileUpload.single('image'), resizeImages, imagesController.uploadImage);
+router.get('/user', imagesController.getImagesByUser);
+
+router.get('/venue/:venueId/user', imagesController.getImagesByVenueAndUser);
+
+router.post('/:venueId', checkUploadPath, fileUpload.array('images'), resizeImages, imagesController.uploadImage);
 
 export default router;

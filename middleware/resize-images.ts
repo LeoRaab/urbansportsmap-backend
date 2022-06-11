@@ -4,32 +4,34 @@ import * as uuid from "uuid"
 import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 
-const resizeImages = (req: Request, res: Response, next: NextFunction) => {
+const resizeImages = async (req: Request, res: Response, next: NextFunction) => {
 
-    if (!req.file) {
+    if (!req.files) {
         return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
     }
 
     const path = 'uploads/images/venues/' + req.params.venueId + '/';
-    const filename = uuid.v1();
+    const images = req.files as Express.Multer.File[];
 
-    try {
-        sharp(req.file.buffer)
-            .resize(100, null, {
-                kernel: sharp.kernel.nearest,
-            })
-            .toFile(path + filename + '.jpg')
-            .then((info: sharp.OutputInfo) => {            
-                req.file!.filename = filename + '.' + info.format;
-                return next();
-                // output.png is a 200 pixels wide and 300 pixels high image
-                // containing a nearest-neighbour scaled version
-                // contained within the north-east corner of a semi-transparent white canvas
-            });
-    } catch (e) {
-        return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
+    for (const image of images) {
+        const filename = uuid.v1() + '.jpeg';
+
+        try {
+            await sharp(image.buffer)
+                .resize(1024, 768, {
+                    kernel: sharp.kernel.nearest,
+                    fit: "cover"
+                })
+                .toFile(path + filename)
+
+            image.filename = filename;
+        } catch (e) {
+            return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
+        }
     }
-    
+
+    return next();
+
 }
 
 export default resizeImages;
