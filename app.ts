@@ -1,5 +1,6 @@
 /**
  * TODO: Logging system
+ * TODO: Catch all errors!
  */
 
 import * as express from 'express';
