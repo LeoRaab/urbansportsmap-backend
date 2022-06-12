@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import * as uuid from "uuid"
+import { rm } from 'node:fs/promises';
 import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 import VenueImage, { IVenueImageDoc } from "../models/venue-image";
@@ -32,7 +33,7 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
 
         for (const filename of imageFilenames) {
 
-            const altText = venue.name + ' | ' + new Date().toLocaleDateString();
+            const altText = venue.name + ' | ' + new Date().toLocaleDateString('de-DE');
 
             const createdImage = new VenueImage({
                 filename,
@@ -61,6 +62,48 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
         
 
         return { createdImages }
+    }
+
+    async deleteImage(imageId: string): Promise<{ isDeleted?: boolean, error?: HttpError }> {
+
+        const { result: image, error } = await this.readByIdAndPopulate(imageId, ['user', 'venue'])
+
+        if (error) {
+            return { error }
+        }
+
+        if (!image) {
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 404) };
+        }
+
+        try {
+            const path = 'uploads/images/venues/' + image.venue.id + '/';
+            await rm(path + image.filename);
+        } catch (e) {
+            console.log(e);
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 404) };
+        }
+
+        try {
+            const session = await mongoose.startSession();
+            session.startTransaction();
+
+            await image.remove({ session });
+
+            image.user.images.pull(image);
+            image.venue.images.pull(image);
+
+            await image.user.save({ session });
+            await image.venue.save({ session });
+
+            await session.commitTransaction();
+        } catch (e) {
+            return { error: new HttpError(MESSAGES.DELETE_FAILED, 500) };
+        }
+
+        return {
+            isDeleted: true
+        }
     }
 }
 
