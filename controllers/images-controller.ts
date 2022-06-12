@@ -62,20 +62,15 @@ const getImagesByVenueAndUser = async (req: Request, res: Response, next: NextFu
 }
 
 const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
-    /*
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return next(new HttpError(MESSAGES.INVALID_INPUT, 422));
-    }
-    */
-
-    const { altText } = req.body;
     const venueId = req.params.venueId;
     const userId = req.userId;
 
     if (!req.files) {
         return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
+    }
+
+    if (!venueId || !userId) {
+        return next(new HttpError(MESSAGES.MISSING_PARAMETERS, 500));
     }
 
     const images = req.files as Express.Multer.File[];
@@ -97,9 +92,33 @@ const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
     });
 }
 
+const deleteImage = async (req: Request, res: Response, next: NextFunction) => {
+    const imageId = req.params.imageId;
+    const userId = req.userId;
+
+    if (!imageId || !userId) {
+        return next(new HttpError(MESSAGES.DELETE_FAILED, 500));
+    }
+
+    const { isDeleted, error } = await imagesRepository.deleteImage(imageId);
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!isDeleted) {
+        return next(new HttpError(MESSAGES.DELETE_FAILED, 500));
+    }
+
+    res.json({
+        message: MESSAGES.DELETE_SUCCESFUL
+    });
+}
+
 export {
     getImagesByVenue,
     getImagesByUser,
     getImagesByVenueAndUser,
-    uploadImage
+    uploadImage,
+    deleteImage
 }
