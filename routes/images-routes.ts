@@ -17,4 +17,6 @@ router.get('/venue/:venueId/user', imagesController.getImagesByVenueAndUser);
 
 router.post('/:venueId', checkUploadPath, fileUpload.array('images'), resizeImages, imagesController.uploadImage);
 
+router.delete('/:imageId', imagesController.deleteImage);
+
 export default router;
