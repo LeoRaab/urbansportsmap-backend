@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-import * as uuid from "uuid"
 import { rm } from 'node:fs/promises';
 import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
