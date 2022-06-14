@@ -8,10 +8,12 @@ const Schema = mongoose.Schema;
 export interface IUser {
     email: string,
     password: string,
-    name: string
+    name: string,
+    isVerified: boolean,
+    verifyString: string,
 }
 
-export interface IUserDoc extends IUser, mongoose.Document {
+export interface IUserDoc extends IUser, mongoose.Document {    
     comments: mongoose.Types.Array<ICommentDoc>,
     favorites: mongoose.Types.Array<IVenueDoc>,
     images: mongoose.Types.Array<IVenueImageDoc>
@@ -21,6 +23,8 @@ const userSchema = new Schema<IUserDoc>({
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true, minlength: 8},
     name: {type: String, required: true},
+    isVerified: {type: Boolean, required: true},
+    verifyString: {type: String, required: true},
     comments: [{type: Schema.Types.ObjectId, required: true, ref: 'Comment'}],
     favorites: [{type: Schema.Types.ObjectId, required: true, ref: 'Venue'}],
     images: [{type: Schema.Types.ObjectId, required: true, ref: 'Image'}]
