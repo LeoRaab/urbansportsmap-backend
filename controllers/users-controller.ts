@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { validationResult } from 'express-validator';
+import * as uuid from 'uuid';
 
 import User, { IUser } from '../models/user';
 import HttpError from '../models/http-error';
@@ -7,6 +8,7 @@ import UsersRepository from '../repositories/users-repository';
 import { signToken } from '../util/handle-jwt';
 import { compareHashStrings } from '../util/handle-crypt';
 import MESSAGES from '../constants/messages';
+import sendMail from '../util/send-mail';
 
 const usersRepository = new UsersRepository();
 
@@ -34,7 +36,9 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const { email, password, name } = req.body;
-    const newUser: IUser = { email, password, name };
+    const verifyString = uuid.v4();
+
+    const newUser: IUser = { email, password, name, isVerified: false, verifyString };
 
     const { userId, error } = await usersRepository.createUser(newUser);
 
@@ -46,16 +50,45 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
         return next(new HttpError(MESSAGES.SIGNUP_FAILED, 500));
     }
 
-    const token = signToken(userId, email);
+    const isEmaiSent = await sendMail(email, verifyString);
 
-    if (!token) {
+    if (!isEmaiSent) {
         return next(new HttpError(MESSAGES.SIGNUP_FAILED, 500));
     }
 
     res.status(201).json({
-        message: MESSAGES.SIGNUP_SUCCESSFUL,
-        userid: userId,
-        token: token
+        message: MESSAGES.SIGNUP_SUCCESSFUL
+    });
+}
+
+const verify = async (req: Request, res: Response, next: NextFunction) => {
+
+    if (!req.params.verifyString) {
+        return next(new HttpError(MESSAGES.MISSING_PARAMETERS, 404));
+    }
+
+    const verifyString = req.params.verifyString;
+
+    const { result: user, error } = await usersRepository.readOne({ verifyString })
+
+    if (error) {
+        return next(error);
+    }
+
+    if (!user) {
+        return next(new HttpError(MESSAGES.VERIFY_FAILED, 500));
+    }
+
+    user.isVerified = true;
+
+    try {
+        user.save();
+    } catch (e) {
+        return next(new HttpError(MESSAGES.VERIFY_FAILED, 500));
+    }
+
+    res.status(201).json({
+        message: MESSAGES.VERIFY_SUCCESSFUL
     });
 }
 
@@ -76,12 +109,14 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!identifiedUser) {
-        return {
-            error: new HttpError(MESSAGES.INVALID_CREDENTIALS, 401)
-        }
+        return next(new HttpError(MESSAGES.INVALID_CREDENTIALS, 401));
     }
 
-    const {isEqual: isValidPassword, error } = await compareHashStrings(password, identifiedUser.password);
+    if (!identifiedUser.isVerified) {
+        return next(new HttpError(MESSAGES.USER_NOT_VERIFIED, 401));
+    }
+
+    const { isEqual: isValidPassword, error } = await compareHashStrings(password, identifiedUser.password);
 
     if (error) {
         return next(error);
@@ -113,6 +148,7 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 export {
     getUserById,
     signup,
+    verify,
     login,
     logout
 }
