@@ -21,6 +21,9 @@ const MESSAGES = {
     USER_EXISTS: 'User existiert bereits, bitte logge dich ein!',
     SIGNUP_FAILED: 'Registrierung fehlgeschlagen, versuch es bitte erneut!',
     SIGNUP_SUCCESSFUL: 'Registrierung erfolgreich!',
+    USER_NOT_VERIFIED: 'Email-Adresse wurde noch nicht verifiziert!',
+    VERIFY_FAILED: 'Verifizierung der Email-Adresse ist fehlgeschlagen!',
+    VERIFY_SUCCESSFUL: 'Verifizierung erfolgreich!'
 }
 
 export default MESSAGES;
