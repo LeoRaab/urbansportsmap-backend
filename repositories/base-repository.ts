@@ -1,4 +1,4 @@
-import { Model, HydratedDocument, UnpackedIntersection, FilterQuery } from "mongoose";
+import { Model, HydratedDocument, UnpackedIntersection, FilterQuery, UpdateQuery } from "mongoose";
 import MESSAGES from "../constants/messages";
 import HttpError from "../models/http-error";
 
@@ -57,7 +57,7 @@ abstract class BaseRepository<T> {
         }
     }
 
-    async readOne(condition: object, projection?: string[]): Promise<{ result?: T | null, error?: HttpError }> {
+    async readOne(condition: FilterQuery<T>, projection?: string[]): Promise<{ result?: T | null, error?: HttpError }> {
         try {
             const result = await this.model.findOne(condition, projection);
             return { result }
@@ -66,7 +66,7 @@ abstract class BaseRepository<T> {
         }
     }
 
-    async readOneAndPopulate(condition: object, populateWith: string, projection?: string[]): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
+    async readOneAndPopulate(condition: FilterQuery<T>, populateWith: string, projection?: string[]): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
         try {
             const result = await this.model.findOne<T>(condition, projection).populate(populateWith);
             return { result }
@@ -75,7 +75,7 @@ abstract class BaseRepository<T> {
         }
     }
 
-    async update(updateId: string, updateItem: object): Promise<{ result?: T, error?: HttpError }> {
+    async update(updateId: string, updateItem: UpdateQuery<T>): Promise<{ result?: T, error?: HttpError }> {
         try {
             const result = await this.model.findByIdAndUpdate(updateId, updateItem);
 
