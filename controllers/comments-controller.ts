@@ -56,8 +56,6 @@ const createComment = async (req: Request, res: Response, next: NextFunction) =>
     const userId = req.userId;
     const venueId = req.params.venueId;
 
-    console.log(comment + ' | ' + userId + ' | ' + venueId);
-
     const { createdComment, error } = await commentsRepository.createComment(comment, userId, venueId);
 
     if (error) {
