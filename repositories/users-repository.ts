@@ -11,7 +11,7 @@ class UsersRepository extends BaseRepository<IUserDoc> {
 
     async createUser(user: IUser): Promise<{ userId?: string | null, error?: HttpError }> {
 
-        const { result: existingUser, error: readError } = await this.readOne({ email: user.email });
+        const { result: existingUser, error: readError } = await this.readOne({ $or: [{ email: user.email }, { name: user.name }] });
 
         if (readError) {
             return { error: readError }
@@ -31,6 +31,8 @@ class UsersRepository extends BaseRepository<IUserDoc> {
             email: user.email,
             password: hashedPassword,
             name: user.name,
+            isVerified: user.isVerified,
+            verifyString: user.verifyString,
             comments: [],
             favorites: []
         }
@@ -44,7 +46,7 @@ class UsersRepository extends BaseRepository<IUserDoc> {
         if (!createdUser) {
             return { error: new HttpError(MESSAGES.SIGNUP_FAILED, 500) }
         }
-        
+
         return { userId: createdUser.id }
     }
 
