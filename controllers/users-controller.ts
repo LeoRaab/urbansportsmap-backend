@@ -13,7 +13,7 @@ import sendMail from '../util/send-mail';
 const usersRepository = new UsersRepository();
 
 const getUserById = async (req: Request, res: Response, next: NextFunction) => {
-    const { result, error } = await usersRepository.readById(req.params.userId, ['-password']);
+    const { result, error } = await usersRepository.readById(req.params.userId, {projection: ['-password']});
 
     if (error) {
         return next(error);
@@ -133,15 +133,9 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     res.json({
+        message: MESSAGES.LOGIN_SUCCESSFUL,
         userId: identifiedUser.id,
         token: token
-    });
-}
-
-const logout = async (req: Request, res: Response, next: NextFunction) => {
-
-    res.json({
-        message: MESSAGES.LOGOUT_SUCCESSFUL
     });
 }
 
@@ -149,6 +143,5 @@ export {
     getUserById,
     signup,
     verify,
-    login,
-    logout
+    login
 }

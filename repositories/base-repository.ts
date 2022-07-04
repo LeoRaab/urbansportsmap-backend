@@ -20,18 +20,18 @@ abstract class BaseRepository<T> {
         }
     }
 
-    async readAll(condition?: FilterQuery<T>): Promise<{ result?: T[], error?: HttpError }> {
+    async readAll(options?: {condition?: FilterQuery<T>, sort?: Record<string, 1 | -1>}): Promise<{ result?: T[], error?: HttpError }> {
         try {
-            const result = await this.model.find<T>({ ...condition });
+            const result = await this.model.find<T>({ ...options?.condition }).sort({...options?.sort})
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
-    async readAllAndPopulate(populateWith: string, condition?: FilterQuery<T>, selectField?: string, projection?: string[]): Promise<{ result?: T[] | null, error?: HttpError }> {
+    async readAllAndPopulate(populateWith: string, options?: {condition?: FilterQuery<T>, selectField?: string, projection?: string[], sort?: Record<string, 1 | -1>}): Promise<{ result?: T[] | null, error?: HttpError }> {
         try {
-            const result = await this.model.find<T>({ ...condition }, projection).populate(populateWith, selectField);
+            const result = await this.model.find<T>({ ...options?.condition }, options?.projection).populate(populateWith, options?.selectField).sort({...options?.sort});
             return { result }
         } catch (e) {
             console.log(e);
@@ -39,36 +39,36 @@ abstract class BaseRepository<T> {
         }
     }
 
-    async readById(id: string, projection?: string[]): Promise<{ result?: T | null, error?: HttpError }> {
+    async readById(id: string, options?: {projection?: string[], sort?: Record<string, 1 | -1>}): Promise<{ result?: T | null, error?: HttpError }> {
         try {
-            const result = await this.model.findById<T>(id, projection);
+            const result = await this.model.findById<T>(id, options?.projection).sort({...options?.sort});
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
-    async readByIdAndPopulate(id: string, populateWith: string | string[], projection?: string[]): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
+    async readByIdAndPopulate(id: string, populateWith: string | string[], options?: {projection?: string[], sort?: Record<string, 1 | -1>}): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
         try {
-            const result = await this.model.findById<T>(id, projection).populate(populateWith);
+            const result = await this.model.findById<T>(id, options?.projection).populate(populateWith).sort({...options?.sort});
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
-    async readOne(condition: FilterQuery<T>, projection?: string[]): Promise<{ result?: T | null, error?: HttpError }> {
+    async readOne(condition: FilterQuery<T>, options?: {projection?: string[], sort?: Record<string, 1 | -1>}): Promise<{ result?: T | null, error?: HttpError }> {
         try {
-            const result = await this.model.findOne(condition, projection);
+            const result = await this.model.findOne(condition, options?.projection).sort({...options?.sort});
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }
         }
     }
 
-    async readOneAndPopulate(condition: FilterQuery<T>, populateWith: string, projection?: string[]): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
+    async readOneAndPopulate(condition: FilterQuery<T>, populateWith: string, options?: {projection?: string[], sort?: Record<string, 1 | -1>}): Promise<{ result?: Awaited<UnpackedIntersection<T, {}>> | null, error?: HttpError }> {
         try {
-            const result = await this.model.findOne<T>(condition, projection).populate(populateWith);
+            const result = await this.model.findOne<T>(condition, options?.projection).populate(populateWith).sort({...options?.sort});
             return { result }
         } catch (e) {
             return { error: new HttpError(MESSAGES.FETCH_FAILED, 500) }

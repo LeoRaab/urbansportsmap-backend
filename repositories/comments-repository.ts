@@ -59,7 +59,7 @@ class CommentsRepository extends BaseRepository<ICommentDoc> {
 
     async readComments(condition: FilterQuery<ICommentDoc>): Promise<{ comments?: ICommentDoc[], error?: HttpError }> {
 
-        const { result: comments, error } = await this.readAllAndPopulate('author', condition, 'name');
+        const { result: comments, error } = await this.readAllAndPopulate('author', {condition, selectField: 'name', sort: {updatedAt: -1}});
 
         if (error) {
             return { error }

@@ -9,7 +9,7 @@ const imagesRepository = new ImagesRepository();
 const getImagesByVenue = async (req: Request, res: Response, next: NextFunction) => {
     const venueId = req.params.venueId;
 
-    const { result: images, error } = await imagesRepository.readAll({ venue: venueId });
+    const { result: images, error } = await imagesRepository.readAll({condition: { venue: venueId }});
 
     if (error) {
         return next(error);
@@ -27,7 +27,7 @@ const getImagesByVenue = async (req: Request, res: Response, next: NextFunction)
 const getImagesByUser = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.userId;
 
-    const { result: images, error } = await imagesRepository.readAll({ user: userId });
+    const { result: images, error } = await imagesRepository.readAll({ condition: {user: userId} });
 
     if (error) {
         return next(error);
@@ -46,7 +46,7 @@ const getImagesByVenueAndUser = async (req: Request, res: Response, next: NextFu
     const venueId = req.params.venueId;
     const userId = req.userId;
 
-    const { result: images, error } = await imagesRepository.readAll({ venue: venueId, user: userId });
+    const { result: images, error } = await imagesRepository.readAll({ condition: {venue: venueId, user: userId}});
 
     if (error) {
         return next(error);
