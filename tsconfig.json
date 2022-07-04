@@ -9,7 +9,10 @@
     "outDir": "dist",
     "sourceMap": true,
     "moduleResolution": "node",
-    "target": "ES6"
+    "target": "ES6",
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
   },
   "include": ["**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
