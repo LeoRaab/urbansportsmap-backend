@@ -24,6 +24,4 @@ router.use(auth);
 
 router.get('/:userId', usersController.getUserById);
 
-router.post('/logout', usersController.logout);
-
 export default router;
