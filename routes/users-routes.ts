@@ -5,18 +5,21 @@ import auth from '../middleware/auth';
 
 const router = Router();
 
-router.post('/login',
-    [
-        check('email').normalizeEmail().isEmail(),
-        check('password').isLength({ min: 10 })
-    ], usersController.login);
+router.post(
+  '/login',
+  [check('email').normalizeEmail().isEmail(), check('password').isLength({ min: 10 })],
+  usersController.login,
+);
 
-router.post('/signup',
-    [
-        check('email').normalizeEmail().isEmail(),
-        check('password').isLength({ min: 10 }),
-        check('name').isLength({ min: 3, max: 25})
-    ], usersController.signup);
+router.post(
+  '/signup',
+  [
+    check('email').normalizeEmail().isEmail(),
+    check('password').isLength({ min: 10 }),
+    check('name').isLength({ min: 3, max: 25 }),
+  ],
+  usersController.signup,
+);
 
 router.get('/verify/:verifyString', usersController.verify);
 

@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import * as venuesController from '../controllers/venues-controller';
 import auth from '../middleware/auth';
 

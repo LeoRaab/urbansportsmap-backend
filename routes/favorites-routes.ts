@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import * as favoritesController from '../controllers/favorites-controller';
 import auth from '../middleware/auth';
 

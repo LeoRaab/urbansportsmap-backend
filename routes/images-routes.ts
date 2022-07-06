@@ -1,9 +1,9 @@
-import { Router } from "express";
-import fileUpload from "../middleware/file-upload";
+import { Router } from 'express';
+import fileUpload from '../middleware/file-upload';
 import * as imagesController from '../controllers/images-controller';
-import auth from "../middleware/auth";
-import checkUploadPath from "../middleware/check-upload-path";
-import resizeImages from "../middleware/resize-images";
+import auth from '../middleware/auth';
+import checkUploadPath from '../middleware/check-upload-path';
+import resizeImages from '../middleware/resize-images';
 
 const router = Router();
 

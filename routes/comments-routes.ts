@@ -1,6 +1,6 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import * as commentsController from '../controllers/comments-controller';
-import {check} from 'express-validator';
+import { check } from 'express-validator';
 import auth from '../middleware/auth';
 
 const router = Router();
@@ -11,7 +11,7 @@ router.use(auth);
 
 router.get('/user/', commentsController.getCommentsByUserId);
 
-router.post('/:venueId', check('comment').isLength({min: 3}), commentsController.createComment);
+router.post('/:venueId', check('comment').isLength({ min: 3 }), commentsController.createComment);
 
 router.patch('/:commentId', commentsController.updateComment);
 

@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import User from '../models/user';
 import HttpError from '../models/http-error';
 import Venue from '../models/venue';
@@ -8,65 +8,61 @@ import MESSAGES from '../constants/messages';
 const favoritesRepository = new FavoritesRepository();
 
 const getFavorites = async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.userId;
+  const userId = req.userId;
 
-    const {result: user, error} = await favoritesRepository.readByIdAndPopulate(userId, 'favorites');
+  const { result: user, error } = await favoritesRepository.readByIdAndPopulate(userId, 'favorites');
 
-    if (error) {
-        return next(error);
-    }
+  if (error) {
+    return next(error);
+  }
 
-    if (!user) {
-        return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
-    }
+  if (!user) {
+    return next(new HttpError(MESSAGES.NO_DATA_FOUND, 404));
+  }
 
-    res.json({
-        favorites: user.toObject({ getters: true}).favorites
-    });
-}
+  res.json({
+    favorites: user.toObject({ getters: true }).favorites,
+  });
+};
 
 const createFavorite = async (req: Request, res: Response, next: NextFunction) => {
-    const venueId = req.params.venueId;
-    const userId = req.userId;
+  const venueId = req.params.venueId;
+  const userId = req.userId;
 
-    const {favorites, error} = await favoritesRepository.createFavorite(userId, venueId);
+  const { favorites, error } = await favoritesRepository.createFavorite(userId, venueId);
 
-    if (error) {
-        return next(error);
-    }
+  if (error) {
+    return next(error);
+  }
 
-    if (!favorites) {
-        return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
-    }
+  if (!favorites) {
+    return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
+  }
 
-    res.status(201).json({
-        message: MESSAGES.CREATE_SUCCESSFUL,
-        favorites
-    });
-}
+  res.status(201).json({
+    message: MESSAGES.CREATE_SUCCESSFUL,
+    favorites,
+  });
+};
 
 const deleteFavorite = async (req: Request, res: Response, next: NextFunction) => {
-    const venueId = req.params.venueId;
-    const userId = req.userId;
-    
-    const {favorites, error} = await favoritesRepository.deleteFavorite(userId, venueId);
+  const venueId = req.params.venueId;
+  const userId = req.userId;
 
-    if (error) {
-        return next(error);
-    }
+  const { favorites, error } = await favoritesRepository.deleteFavorite(userId, venueId);
 
-    if (!favorites) {
-        return next(new HttpError(MESSAGES.DELETE_FAILED, 500));
-    }
+  if (error) {
+    return next(error);
+  }
 
-    res.json({
-        message: MESSAGES.DELETE_SUCCESFUL,
-        favorites
-    });
-}
+  if (!favorites) {
+    return next(new HttpError(MESSAGES.DELETE_FAILED, 500));
+  }
 
-export {
-    getFavorites,
-    createFavorite,
-    deleteFavorite
-}
+  res.json({
+    message: MESSAGES.DELETE_SUCCESFUL,
+    favorites,
+  });
+};
+
+export { getFavorites, createFavorite, deleteFavorite };
