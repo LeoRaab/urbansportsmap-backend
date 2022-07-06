@@ -1,12 +1,3 @@
-/**
- * TODO: Logging system
- * TODO: Catch all errors!
- * TODO: Use .env!!
- * TODO: Check status codes
- * TODO: Clear user, if mail could not be sent
- * TODO: Check if email && name is already used
- */
-
 import * as express from 'express';
 import * as path from 'path';
 import { Request, Response, NextFunction } from 'express';
