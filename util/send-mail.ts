@@ -19,7 +19,7 @@ const sendMail = async (email: string, verifyString: string): Promise<boolean> =
     sender: 'Urban Sports Map',
     to: email,
     subject: 'Email-Adresse bestätigen',
-    html: `Klicke bitte <a href="${process.env.HOST}/verify/${verifyString}>hier</a> um deine Email-Adresse zu bestätigen. Danke!`,
+    html: `Klicke bitte <a href="${process.env.FRONTEND_URL}/verify/${verifyString}>hier</a> um deine Email-Adresse zu bestätigen. Danke!`,
   };
 
   return new Promise((res, rej) => {
