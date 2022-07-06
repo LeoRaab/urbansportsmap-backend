@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "tsc && mv -i -v uploads/images dist/ && rm -v -rf src",
     "build": "npx tsc",
     "start": "node start dist/app.js",
     "dev-start": "nodemon --watch './**/*.ts' --exec 'ts-node' app.ts"
