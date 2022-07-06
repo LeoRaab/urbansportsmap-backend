@@ -10,6 +10,4 @@ router.get('/:venueId', venuesController.getVenueById);
 
 router.use(auth);
 
-router.post('/fetch', venuesController.createVenues);
-
 export default router;
