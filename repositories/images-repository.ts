@@ -1,11 +1,12 @@
 import * as mongoose from 'mongoose';
-import { rm } from 'node:fs/promises';
+import { deleteFile } from '../util/s3';
 import MESSAGES from '../constants/messages';
 import HttpError from '../models/http-error';
 import VenueImage, { IVenueImageDoc } from '../models/venue-image';
 import BaseRepository from './base-repository';
 import UsersRepository from './users-repository';
 import VenuesRepository from './venues-repository';
+import { UploadImage } from 'util/upload-images';
 
 class ImagesRepository extends BaseRepository<IVenueImageDoc> {
   constructor() {
@@ -13,7 +14,7 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
   }
 
   async createImages(
-    imageFilenames: string[],
+    uploadedImages: UploadImage[],
     venueId: string,
     userId: string,
   ): Promise<{ createdImages?: IVenueImageDoc[]; error?: HttpError }> {
@@ -34,11 +35,13 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
 
     const createdImages: IVenueImageDoc[] = [];
 
-    for (const filename of imageFilenames) {
+    for (const uploadedImage of uploadedImages) {
+      const {key, url} = uploadedImage;
       const altText = venue.name + ' | ' + new Date().toLocaleDateString('de-DE');
 
       const createdImage = new VenueImage({
-        filename,
+        imageKey: key,
+        url,
         altText,
         user,
         venue,
@@ -57,6 +60,8 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
         await user.save({ session });
 
         await session.commitTransaction();
+
+        createdImages.push(createdImage);
       } catch (e) {
         return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) };
       }
@@ -77,8 +82,7 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
     }
 
     try {
-      const path = 'uploads/images/venues/' + image.venue.id + '/';
-      await rm(path + image.filename);
+      await deleteFile(image.imageKey);
     } catch (e) {
       console.log(e);
       return { error: new HttpError(MESSAGES.DELETE_FAILED, 404) };

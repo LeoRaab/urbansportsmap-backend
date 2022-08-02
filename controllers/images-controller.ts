@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
+import uploadImages from '../util/upload-images';
 import MESSAGES from '../constants/messages';
 import HttpError from '../models/http-error';
-import VenueImage, { IVenueImageDoc } from '../models/venue-image';
+import { IVenueImageDoc } from '../models/venue-image';
 import ImagesRepository from '../repositories/images-repository';
 
 const imagesRepository = new ImagesRepository();
@@ -61,7 +62,7 @@ const getImagesByVenueAndUser = async (req: Request, res: Response, next: NextFu
   });
 };
 
-const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
+const saveImages = async (req: Request, res: Response, next: NextFunction) => {
   const venueId = req.params.venueId;
   const userId = req.userId;
 
@@ -73,11 +74,15 @@ const uploadImage = async (req: Request, res: Response, next: NextFunction) => {
     return next(new HttpError(MESSAGES.MISSING_PARAMETERS, 500));
   }
 
-  const images = req.files as Express.Multer.File[];
+  const { uploadedImages } = await uploadImages(req.files as Express.Multer.File[]);
 
-  const imageFilenames = images.map((image) => image.filename);
+  if (!uploadedImages || uploadedImages.length <= 0) {
+    return next(new HttpError(MESSAGES.CREATE_FAILED, 500));
+  }
 
-  const { createdImages, error } = await imagesRepository.createImages(imageFilenames, venueId, userId);
+  const { createdImages, error } = await imagesRepository.createImages(uploadedImages, venueId, userId);
+
+  // If error occurs, delete images from bucket
 
   if (error) {
     return next(error);
@@ -115,4 +120,4 @@ const deleteImage = async (req: Request, res: Response, next: NextFunction) => {
   });
 };
 
-export { getImagesByVenue, getImagesByUser, getImagesByVenueAndUser, uploadImage, deleteImage };
+export { getImagesByVenue, getImagesByUser, getImagesByVenueAndUser, saveImages, deleteImage };

@@ -5,7 +5,8 @@ import { IVenueDoc } from './venue';
 const Schema = mongoose.Schema;
 
 export interface IVenueImageDoc extends mongoose.Document {
-  filename: string;
+  imageKey: string;
+  url: string;
   altText: string;
   user: IUserDoc;
   venue: IVenueDoc;
@@ -13,7 +14,8 @@ export interface IVenueImageDoc extends mongoose.Document {
 
 const venueImageSchema = new Schema<IVenueImageDoc>(
   {
-    filename: { type: String, required: true },
+    imageKey: { type: String, required: true },
+    url: { type: String, required: true },
     altText: { type: String, required: true },
     user: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     venue: { type: Schema.Types.ObjectId, required: true, ref: 'Venue' },
