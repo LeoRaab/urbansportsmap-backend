@@ -23,8 +23,14 @@ router.post(
 
 router.get('/verify/:verifyString', usersController.verify);
 
+router.post('/password/request', [check('email').normalizeEmail().isEmail()], usersController.requestPassword);
+
+router.patch('/password/reset', [check('password').isLength({ min: 10 })], usersController.resetPassword);
+
 router.use(auth);
 
-router.get('/:userId', usersController.getUserById);
+router.get('/', usersController.getUserById);
+
+router.delete('/', usersController.deleteUser);
 
 export default router;
