@@ -22,6 +22,10 @@ const MESSAGES = {
   SIGNUP_FAILED: 'Registrierung fehlgeschlagen, versuch es bitte erneut!',
   SIGNUP_SUCCESSFUL: 'Registrierung erfolgreich!',
   USER_NOT_VERIFIED: 'Email-Adresse wurde noch nicht verifiziert!',
+  USER_AUTH_FAILED: 'Benutzer konnte nicht authentifiziert werden!',
+  USER_ID_DIFFERENT: 'Die User stimmen nicht überein!',
+  RESET_PASSWORD_FAILED: 'Das zurücksetzen des Passworts ist fehlgeschlagen!',
+  RESET_PASSWORD_SUCCESSFUL: 'Das zurücksetzen des Passworts war erfolgreich!',
   VERIFY_FAILED: 'Verifizierung der Email-Adresse ist fehlgeschlagen!',
   VERIFY_SUCCESSFUL: 'Verifizierung erfolgreich!',
 };
