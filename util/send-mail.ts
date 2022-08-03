@@ -1,6 +1,6 @@
 import * as nodemailer from 'nodemailer';
 
-const sendMail = async (email: string, verifyString: string): Promise<boolean> => {
+const sendMail = async (email: string, subject: string, mailHtml: string): Promise<boolean> => {
   const transport = nodemailer.createTransport({
     host: process.env.CONFIRM_MAIL_HOST,
     port: 587,
@@ -18,8 +18,8 @@ const sendMail = async (email: string, verifyString: string): Promise<boolean> =
     from: process.env.CONFIRM_MAIL_ADDRESS,
     sender: 'Urban Sports Map',
     to: email,
-    subject: 'Email-Adresse bestätigen',
-    html: `Klicke bitte <a href="${process.env.FRONTEND_URL}/verify/${verifyString}>hier</a> um deine Email-Adresse zu bestätigen. Danke!`,
+    subject,
+    html: mailHtml,
   };
 
   return new Promise((res, rej) => {
