@@ -7,7 +7,7 @@ const resizeImage = async (image: Express.Multer.File): Promise<Buffer | undefin
         kernel: sharp.kernel.nearest,
         fit: 'cover'
       })
-      .jpeg({ quality: 95 })
+      .jpeg()
       .toBuffer();
   } catch (e) {
     //Log error!
