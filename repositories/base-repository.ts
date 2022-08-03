@@ -1,6 +1,8 @@
 import { Model, HydratedDocument, UnpackedIntersection, FilterQuery, UpdateQuery } from 'mongoose';
+import {DeleteResult} from 'mongodb';
 import MESSAGES from '../constants/messages';
 import HttpError from '../models/http-error';
+
 
 abstract class BaseRepository<T> {
   private model: Model<T>;
@@ -108,7 +110,7 @@ abstract class BaseRepository<T> {
     }
   }
 
-  async update(updateId: string, updateItem: UpdateQuery<T>): Promise<{ result?: T; error?: HttpError }> {
+  async updateById(updateId: string, updateItem: UpdateQuery<T>): Promise<{ result?: T; error?: HttpError }> {
     try {
       const result = await this.model.findByIdAndUpdate(updateId, updateItem);
 
@@ -119,6 +121,34 @@ abstract class BaseRepository<T> {
       return { result };
     } catch (e) {
       return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) };
+    }
+  }
+
+  async updateByQuery(filterQuery: FilterQuery<T>, updateItem: UpdateQuery<T>): Promise<{ result?: T; error?: HttpError }> {
+    try {
+      const result = await this.model.findOneAndUpdate(filterQuery, updateItem);
+
+      if (!result) {
+        return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) };
+      }
+
+      return { result };
+    } catch (e) {
+      return { error: new HttpError(MESSAGES.UPDATE_FAILED, 500) };
+    }
+  }
+
+  async delete(deleteId: string): Promise<{ result?: T; error?: HttpError }> {
+    try {
+      const result = await this.model.findByIdAndDelete(deleteId);
+
+      if (!result) {
+        return { error: new HttpError(MESSAGES.DELETE_FAILED, 500) };
+      }
+
+      return { result };
+    } catch (e) {
+      return { error: new HttpError(MESSAGES.DELETE_FAILED, 500) };
     }
   }
 }

@@ -81,7 +81,7 @@ const updateComment = async (req: Request, res: Response, next: NextFunction) =>
   const commentId = req.params.commentId;
   const commentText = req.body.comment;
 
-  const { result: updatedComment, error } = await commentsRepository.update(commentId, { comment: commentText });
+  const { result: updatedComment, error } = await commentsRepository.updateById(commentId, { comment: commentText });
 
   if (error) {
     return next(error);
