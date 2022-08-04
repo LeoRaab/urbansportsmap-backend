@@ -56,6 +56,7 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   const isEmaiSent = await sendMail(email, subject, mailText);
 
   if (!isEmaiSent) {
+    await usersRepository.delete(userId);
     return next(new HttpError(MESSAGES.SIGNUP_FAILED, 500));
   }
 
@@ -173,7 +174,7 @@ const requestPassword = async (req: Request, res: Response, next: NextFunction) 
 
   const isEmaiSent = await sendMail(user.email, subject, mailText);
 
-  if (!isEmaiSent) {
+  if (!isEmaiSent) {    
     return next(new HttpError(MESSAGES.RESET_PASSWORD_FAILED, 500));
   }
 
