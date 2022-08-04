@@ -18,9 +18,9 @@ const MIME_TYPE_MAP: IMIME_TYPE_MAP = {
 };
 
 const fileUpload = multer({
-  //limit uploads to 2 MB
+  //limit uploads to 5 MB
   limits: {
-    fileSize: 2097152,
+    fileSize: 5242880,
   },
   storage: multer.memoryStorage(),
   fileFilter: (request: Request, file: Express.Multer.File, callback: multer.FileFilterCallback) => {
