@@ -16,7 +16,6 @@ const sendMail = async (email: string, subject: string, mailHtml: string): Promi
 
   const mailOptions: nodemailer.SendMailOptions = {
     from: process.env.CONFIRM_MAIL_ADDRESS,
-    sender: 'Urban Sports Map',
     to: email,
     subject,
     html: mailHtml,
