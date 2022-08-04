@@ -51,9 +51,10 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   const subject = 'Email-Adresse bestätigen';
-  const mailText = `Klicke bitte <a href="${process.env.FRONTEND_URL}/user/verify/${verifyString}>hier</a> um deine Email-Adresse zu bestätigen. Danke!`;
+  const mailText = `Gehe bitte zu: ${process.env.FRONTEND_URL}/user/verify/${verifyString}, um deinen Account zu verifizieren.`;
+  const mailHtml = `Klicke bitte <a href="${process.env.FRONTEND_URL}/user/verify/${verifyString}>hier</a> um deine Email-Adresse zu bestätigen. Danke!`;
 
-  const isEmaiSent = await sendMail(email, subject, mailText);
+  const isEmaiSent = await sendMail({email, subject, mailText, mailHtml});
 
   if (!isEmaiSent) {
     await usersRepository.delete(userId);
@@ -170,11 +171,12 @@ const requestPassword = async (req: Request, res: Response, next: NextFunction) 
   }
 
   const subject = 'Passwort zurücksetzen';
-  const mailText = `Klicke bitte <a href="${process.env.FRONTEND_URL}/user/password/reset/${verifyString}>hier</a> um dein Passwort zurückzusetzen. Danke!`;
+  const mailText = `Gehe bitte zu: ${process.env.FRONTEND_URL}/user/password/reset/${verifyString}, um dein Passwort zurückzusetzen.`;
+  const mailHtml = `Klicke bitte <a href="${process.env.FRONTEND_URL}/user/password/reset/${verifyString}>hier</a> um dein Passwort zurückzusetzen. Danke!`;
 
-  const isEmaiSent = await sendMail(user.email, subject, mailText);
+  const isEmaiSent = await sendMail({ email: user.email, subject, mailText, mailHtml });
 
-  if (!isEmaiSent) {    
+  if (!isEmaiSent) {
     return next(new HttpError(MESSAGES.RESET_PASSWORD_FAILED, 500));
   }
 

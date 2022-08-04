@@ -1,6 +1,15 @@
 import * as nodemailer from 'nodemailer';
 
-const sendMail = async (email: string, subject: string, mailHtml: string): Promise<boolean> => {
+interface SendOptions {
+  email: string;
+  subject: string;
+  mailText: string;
+  mailHtml: string;
+}
+
+const sendMail = async (sendOptions: SendOptions): Promise<boolean> => {
+  const {email, subject, mailText, mailHtml} = sendOptions;
+
   const transport = nodemailer.createTransport({
     host: process.env.CONFIRM_MAIL_HOST,
     port: 587,
@@ -18,6 +27,7 @@ const sendMail = async (email: string, subject: string, mailHtml: string): Promi
     from: process.env.CONFIRM_MAIL_ADDRESS,
     to: email,
     subject,
+    text: mailText,
     html: mailHtml,
   };
 
