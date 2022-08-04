@@ -1,1 +1,0 @@
-{"version":3,"file":"http-error.js","sourceRoot":"","sources":["../../models/http-error.ts"],"names":[],"mappings":";;AAAA,MAAqB,SAAU,SAAQ,KAAK;IAGxC,YAAY,OAAe,EAAE,SAAiB;QAC1C,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,IAAI,GAAG,SAAS,CAAC;IAC1B,CAAC;CACJ;AAPD,4BAOC"}
