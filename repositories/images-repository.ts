@@ -30,15 +30,14 @@ class ImagesRepository extends BaseRepository<IVenueImageDoc> {
     }
 
     if (!venue || !user) {
-      return { error: new HttpError(MESSAGES.CREATE_FAILED, 404) };
+      return { error: new HttpError(MESSAGES.CREATE_FAILED, 500) };
     }
 
     const createdImages: IVenueImageDoc[] = [];
 
     for (const uploadedImage of uploadedImages) {
-      const {key, url} = uploadedImage;
+      const { key, url } = uploadedImage;
       const altText = venue.name + ' | ' + new Date().toLocaleDateString('de-DE');
-
       const createdImage = new VenueImage({
         imageKey: key,
         url,
